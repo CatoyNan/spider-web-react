@@ -1,5 +1,4 @@
 /**
- * Created by 叶子 on 2017/7/30.
  * http通用工具函数
  */
 import axios from 'axios';
@@ -11,6 +10,27 @@ interface IFRequestParam {
     config?: any;
     data?: any;
 }
+
+export const getRequest = (url:string, data:any) => {
+    return axios({
+      method: 'get',
+      params: data, 
+      url: url,
+    });
+}
+
+export const postJsonRequest = (url:string,params:any) => {
+    return axios({
+        method:"post",
+        url:url,
+        data:params,
+        headers:{
+            'Content-Type': 'application/json',
+        }
+    });
+}
+
+
 /**
  * 公用get请求
  * @param url       接口地址
