@@ -85,7 +85,7 @@ npx react-admin-creator myapp
 -   动画
     -   基础动画(animate.css 所有动画)
     -   动画案例
--   表格
+-   
     -   基础表格(antd 组件)
     -   高级表格(antd 组件)
     -   异步表格(数据来自掘金酱的接口)

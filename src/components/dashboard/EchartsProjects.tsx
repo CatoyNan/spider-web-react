@@ -13,7 +13,7 @@ for (let i = 0; i < 50; i++) {
 
 const option = {
     title: {
-        text: '最近50天每天项目完成情况',
+        text: '最近50天每天任务数',
         left: 'center',
         textStyle: {
             color: '#ccc',

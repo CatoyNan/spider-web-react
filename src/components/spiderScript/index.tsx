@@ -4,8 +4,9 @@ import BreadcrumbCustom from '../BreadcrumbCustom';
 import AceEditor from 'react-ace';
 import { TabsPosition } from 'antd/lib/tabs';
 import { IconType } from 'antd/lib/notification';
-import { getRequest, post } from '../../axios/tools';
+import { getRequest, postJsonRequest } from '../../axios/tools';
 import * as config from '../../../src/axios/config';
+import JSONPretty from 'react-json-pretty';
 
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import 'ace-builds/src-noconflict/mode-java';
@@ -28,6 +29,7 @@ type TabsCustomState = {
     panes: any;
     mode: TabsPosition;
     compilationTasks: any[];
+    resultData: string;
 };
 
 class ScriptEditor extends Component<any, TabsCustomState> {
@@ -49,6 +51,7 @@ class ScriptEditor extends Component<any, TabsCustomState> {
             panes: panes,
             mode: 'top',
             compilationTasks: [],
+            resultData: ''
         };
 
         this.getAllCompilationTasksByUserId('1');
@@ -61,11 +64,10 @@ class ScriptEditor extends Component<any, TabsCustomState> {
      * 根据userId获取所有CompilationTask
      */
     getAllCompilationTasksByUserId = (userId: string) => {
-        getRequest(`${config.SERVER_HOST}/compilationtask/getAllCompilationTasksByUserId`, null)
+        getRequest(`${config.SERVER_HOST}/task/getAllCompilationTasksByUserId`, {'id':'1'})
             .then(result => {
                 if (result.status === 200) {
                     let data = result.data.data;
-                    console.log(data);
                     this.setState({ compilationTasks: data });
                     // this.setState({panes:result.data.data})
                 }
@@ -79,7 +81,6 @@ class ScriptEditor extends Component<any, TabsCustomState> {
     add = (pane?: any) => {
         const panes = this.state.panes;
         const activeKey = '' + ++this.newTabIndex;
-        console.log('activeKye' + activeKey);
         if (pane === undefined) {
             panes.push({ title: 'title', content: 'New Tab Pane', key: activeKey });
         } else {
@@ -87,7 +88,7 @@ class ScriptEditor extends Component<any, TabsCustomState> {
             _pane.title = pane.className;
             _pane.content = 'New Tab Pane';
             _pane.key = activeKey;
-            _pane.code = this.processCode(_pane,processCodeEnum.pullCode);
+            _pane.code = this.processCode(_pane, processCodeEnum.pullCode);
             panes.push(_pane);
         }
         this.setState({ panes: panes, activeKey: activeKey }, function(this: any) {});
@@ -147,32 +148,38 @@ class ScriptEditor extends Component<any, TabsCustomState> {
     };
 
     /**
-     * code处理事件
+     * code文本处理
      */
     processCode = (pane: any, type: number): string => {
+        if (pane.code.length === 0) {
+            this.openNotificationWithIcon('info', '提示：', '文本内容不能为空');
+            return '';
+        }
         let code = '';
         // push代码时对code的处理
         if (type === processCodeEnum.pushCode) {
             let reg = new RegExp('(?<=-\\scallin:).*}');
             let result = reg.exec(pane.code);
             if (result == null) {
-                this.openNotificationWithIcon('error','错误：','没有定义方法入口');
+                this.openNotificationWithIcon('error', '错误：', '没有定义方法入口');
                 return '';
             }
-
+            // 获取methodName 和 args
             let _args = [];
             let callinStr = result[0];
-            let reg2 = /(?<=[:\s]')[\w]+(?=')/g;
-            var result2:any[] = [];
+            let reg2 = /(?<=[:\s]["']).*?(?=["'])/g;
+            var result2: any[] = [];
             var crt;
-            while((crt = reg2.exec(callinStr)) !== null){
+            while ((crt = reg2.exec(callinStr)) !== null) {
                 result2.push(crt[0]);
-            };
+            }
+            console.log('result2')
+            console.log(result2)
             if (result2.length === 0) {
-                this.openNotificationWithIcon('error','错误：','定义方法入口格式有误');
+                this.openNotificationWithIcon('error', '错误：', '定义方法入口格式有误');
                 return '';
             }
-            for (let i=0;i<result2.length;i++) {
+            for (let i = 0; i < result2.length; i++) {
                 if (i === 0) {
                     pane.methodName = result2[i];
                 } else {
@@ -180,8 +187,24 @@ class ScriptEditor extends Component<any, TabsCustomState> {
                 }
             }
             pane.args = _args;
-            console.log(pane)
-            return pane.code.replace('-\\scallin:.*}','');
+
+            // 获取全限定类名
+            let reg3 = new RegExp('(?<=package\\s).*(?=;)');
+            let packageName = reg3.exec(pane.code);
+            if (packageName == null) {
+                this.openNotificationWithIcon('error', '错误：', '没有定义包名');
+                return '';
+            }
+            let reg4 = new RegExp('(?<=public\\sclass\\s)[A-Z]\\w*(?=[\\s{])');
+            let _className = reg4.exec(pane.code);
+            if (_className == null) {
+                this.openNotificationWithIcon('error', '错误：', '无法获取类名');
+                return '';
+            }
+            pane.className = packageName[0] + '.' + _className[0] + '.java';
+
+            // 返回去除‘-callin..’片段的code
+            return pane.code.replace(/(-[\s]*callin:.*}[;]*)/g, '');
         }
         // pull代码时对code对处理
         else {
@@ -195,14 +218,68 @@ class ScriptEditor extends Component<any, TabsCustomState> {
             segment = segment.substring(0, segment.length - 1) + '};';
             code = pane.code + '\n\n' + segment;
             return code;
-        } 
+        }
     };
 
     /**
      * 点击run事件
      */
-    clickRun = (a: string, b: number): string => {
-        return '';
+    clickRun = () => {
+        var _pane;
+        var flag = true;
+        this.state.panes.map((val: any, key: string) => {
+            if (this.state.activeKey === val.key) {
+                _pane = { ...val };
+                let code = this.processCode(_pane, processCodeEnum.pushCode);
+                if (code.length > 0) {
+                    _pane.code = code;
+                    flag = false;
+                }
+            }
+            return key;
+        });
+        if(flag){
+            return;
+        }
+        postJsonRequest(`${config.SERVER_HOST}/task/execute`, _pane)
+            .then(result => {
+                console.log(0)
+                if (result.status === 200) {
+                    let status = result.data.status;
+                    console.log(result.data.data)
+                    if (status === 2002 || status === 2000) {
+                        let errorMsg = result.data.data.errorMsg;
+                        let resultPrint = result.data.data.resultPrint;
+                        let isCompileSuccess = result.data.data.compileSuccess;
+                        let isInvokeSuccess = result.data.data.invokeSuccess;
+                        let resultData = result.data.data.resultData;
+                        var _panes = this.state.panes;
+                        if(isCompileSuccess && isInvokeSuccess){
+                            let var1 = "/**\n" +
+                            " * 执行成功\n" +
+                            " **/\n"
+                            errorMsg = var1 + resultPrint + "\n" + (errorMsg == null?"":errorMsg);
+                        }
+                        _panes.map((val: any, key: string) => {
+                            if (this.state.activeKey === val.key) {
+                                val.errorMsg = errorMsg;
+                                this.setState({panes:_panes,resultData:resultData});
+                            }
+                            return key;
+                        });
+                    } else {
+                        console.log(1);
+                        this.openNotificationWithIcon('error', '错误：', '未知错误');
+                    }
+                } else {
+                    console.log(2)
+                    this.openNotificationWithIcon('error', '错误：', '未知错误');
+                }
+            })
+            .catch(err => {
+                console.log(3)
+                this.openNotificationWithIcon('error', '错误：', '未知错误');
+            });
     };
 
     /**
@@ -216,7 +293,7 @@ class ScriptEditor extends Component<any, TabsCustomState> {
         }
 
         if (this.currentOptionIndex === -1) {
-            this.openNotificationWithIcon('info', '提示：', '请先选择脚本');
+            this.openNotificationWithIcon('info', '提示：', '请先');
             return;
         }
         this.add(array[this.currentOptionIndex]);
@@ -227,18 +304,42 @@ class ScriptEditor extends Component<any, TabsCustomState> {
      */
     clickPush = () => {
         var _pane;
-        this.state.panes.map((val:any,key:string) =>{
+        var flag = true;
+        this.state.panes.map((val: any, key: string) => {
             if (this.state.activeKey === val.key) {
-                _pane = {...val};
-                let code = this.processCode(_pane,processCodeEnum.pushCode);
-                if (code.length>0) {
+                _pane = { ...val };
+                let code = this.processCode(_pane, processCodeEnum.pushCode);
+                if (code.length > 0) {
                     _pane.code = code;
+                    flag = false;
                 }
-            } 
+            }
             return key;
-        }); 
-        console.log(_pane)
-    }
+        });
+        if(flag){
+            return;
+        }
+        postJsonRequest(`${config.SERVER_HOST}/task/push`, _pane)
+            .then(result => {
+                console.log(0)
+                if (result.status === 200) {
+                    let status = result.data.status;
+                    if (status === 2002 || status === 2000) {
+                        this.openNotificationWithIcon('success', '成功：', 'push成功');
+                    } else {
+                        console.log(1);
+                        this.openNotificationWithIcon('error', '错误：', 'push失败');
+                    }
+                } else {
+                    console.log(2)
+                    this.openNotificationWithIcon('error', '错误：', '未知错误');
+                }
+            })
+            .catch(err => {
+                console.log(3)
+                this.openNotificationWithIcon('error', '错误：', '未知错误');
+            });
+    };
 
     /**
      * 提示框
@@ -287,7 +388,7 @@ class ScriptEditor extends Component<any, TabsCustomState> {
                                                 DEL
                                             </Button>
                                             <Button
-                                                // onClick={this.add}
+                                                onClick={this.clickRun}
                                                 style={{
                                                     background: '#2ecc71',
                                                     borderColor: '#2ecc71',
@@ -335,7 +436,7 @@ class ScriptEditor extends Component<any, TabsCustomState> {
                                                     this.editorOnChange(vue, event, pane.key);
                                                 }}
                                                 width={'1500px'}
-                                                height={'500px'}
+                                                height={'450px'}
                                                 fontSize={14}
                                                 showPrintMargin={false}
                                                 // showGutter={false}
@@ -354,10 +455,10 @@ class ScriptEditor extends Component<any, TabsCustomState> {
                                                 mode="java"
                                                 name="blah2"
                                                 width={'1500px'}
-                                                height={'100px'}
+                                                height={'200px'}
                                                 fontSize={10}
                                                 showPrintMargin={false}
-                                                value={pane.code}
+                                                value={pane.errorMsg?pane.errorMsg:''}
                                                 style={{ color: 'red' }}
                                                 readOnly
                                                 setOptions={{
@@ -371,68 +472,10 @@ class ScriptEditor extends Component<any, TabsCustomState> {
                             </Card>
                         </div>
                     </Col>
-                    <Col className="gutter-row" md={8}>
-                        <div className="gutter-box">
-                            <Card title="带删除和新增" bordered={false}>
-                                <div style={{ marginBottom: 16 }}>
-                                    {/* <Button onClick={this.add}>ADD</Button> */}
-                                </div>
-                                <Tabs
-                                    hideAdd
-                                    // onChange={this.onChange}
-                                    activeKey={this.state.activeKey}
-                                    type="editable-card"
-                                    onEdit={this.onEdit}
-                                >
-                                    {this.state.panes.map((pane: any) => (
-                                        <TabPane tab={pane.title} key={pane.key}>
-                                            <AceEditor
-                                                placeholder="Placeholder Text"
-                                                mode="java"
-                                                theme="monokai"
-                                                name="blah2"
-                                                // onLoad={this.onLoad}
-                                                // onChange={this.onChange}
-                                                width={'60'}
-                                                fontSize={14}
-                                                showPrintMargin={false}
-                                                // showGutter={false}
-                                                // highlightActiveLine={false}
-                                                value={'123'}
-                                                setOptions={{
-                                                    enableBasicAutocompletion: true,
-                                                    enableLiveAutocompletion: true,
-                                                    enableSnippets: false,
-                                                    showLineNumbers: true,
-                                                    tabSize: 2,
-                                                }}
-                                            />
-                                        </TabPane>
-                                    ))}
-                                </Tabs>
-                            </Card>
-                        </div>
-                    </Col>
-                    <Col className="gutter-row" md={8}>
-                        <div className="gutter-box">
-                            <Card title="带删除和新增" bordered={false}>
-                                <Tabs
-                                    hideAdd
-                                    // onChange={this.onChange}
-                                    activeKey={this.state.activeKey}
-                                    type="editable-card"
-                                    onEdit={this.onEdit}
-                                >
-                                    <TabPane tab="Tab 1" key="1">
-                                        Content of Tab Pane 1
-                                    </TabPane>
-                                </Tabs>
-                            </Card>
-                        </div>
-                    </Col>
-                    <Col className="gutter-row" md={8}>
+                    <Col className="gutter-row" md={24}>
                         <Card title="同步转换JSON" bordered={false}>
-                            <pre style={{ whiteSpace: 'normal' }}>{JSON.stringify('')}</pre>
+                            {/* <pre style={{ whiteSpace: 'normal' }}>{(this.state.resultData,null)}</pre> */}
+                            <JSONPretty id="json-pretty" data={this.state.resultData} />
                         </Card>
                     </Col>
                 </Row>

@@ -22,6 +22,7 @@ const menus: {
     menus: [
         // 菜单相关路由
         { key: '/app/spiderScript/sciptEditor', title: '爬虫脚本', icon: 'mobile', component: 'ScriptEditor' },
+        { key: '/app/spiderTask/', title: '爬取任务', icon: 'mobile', component: 'SpiderTask' },
         { key: '/app/dashboard/index', title: '首页', icon: 'mobile', component: 'Dashboard' },
         {
             key: '/app/ui',

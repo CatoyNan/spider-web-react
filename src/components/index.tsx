@@ -29,6 +29,7 @@ import MapUi from './ui/map';
 import QueryParams from './extension/QueryParams';
 import Visitor from './extension/Visitor';
 import ScriptEditor from './spiderScript/'
+import SpiderTask from './spiderTask'
 
 const WysiwygBundle = Loadable({
     // 按需加载富文本配置
@@ -63,4 +64,5 @@ export default {
     QueryParams,
     Visitor,
     ScriptEditor,
+    SpiderTask
 } as any;
