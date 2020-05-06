@@ -30,7 +30,7 @@ import QueryParams from './extension/QueryParams';
 import Visitor from './extension/Visitor';
 import ScriptEditor from './spiderScript/'
 import SpiderTask from './spiderTask'
-
+import ScriptShare from './scriptShare'
 const WysiwygBundle = Loadable({
     // 按需加载富文本配置
     loader: () => import('./ui/Wysiwyg'),
@@ -64,5 +64,6 @@ export default {
     QueryParams,
     Visitor,
     ScriptEditor,
-    SpiderTask
+    SpiderTask,
+    ScriptShare
 } as any;

@@ -16,7 +16,7 @@ type CRouterProps = {
 export default class CRouter extends Component<CRouterProps> {
     getPermits = (): any[] | null => {
         const { auth } = this.props;
-        return auth ? auth.data.permissions : null;
+        return auth ? null : null;
     };
 
     requireAuth = (permit: any, component: React.ReactElement) => {

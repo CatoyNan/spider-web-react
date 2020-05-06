@@ -40,7 +40,7 @@ class ScriptEditor extends Component<any, TabsCustomState> {
                 title: 'NewTab 0',
                 content: 'Content of Tab Pane 0',
                 key: '0',
-                code: 'public',
+                code: '',
                 args: ['1', '2'],
                 methodName: 'run',
                 className: 'Hello.java',
@@ -354,7 +354,7 @@ class ScriptEditor extends Component<any, TabsCustomState> {
     render() {
         return (
             <div className="main">
-                <BreadcrumbCustom first="UI" second="富文本" />
+                <BreadcrumbCustom second="编辑器" />
                 <Row gutter={16}>
                     <Col className="gutter-row" md={24}>
                         <div className="gutter-box">

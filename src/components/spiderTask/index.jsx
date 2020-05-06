@@ -306,11 +306,11 @@ class SpiderTask extends PureComponent {
         const columns = [
             {
                 title: '编号',
-                dataIndex: 'id',
-                key: 'id',
+                dataIndex: 'jobGroup',
+                key: 'jobGroup',
                 align: 'left',
                 defaultSortOrder: 'ascend',
-                width:50
+                width:150
             },
             {
                 title: '链接',
@@ -537,7 +537,7 @@ class SpiderTask extends PureComponent {
         //删除任务按钮
         let deleteJobButton = ()=>{
             return (
-                <Button onClick={() => {
+                <Button style={{ marginLeft: 8 }} onClick={() => {
                     if (Object.keys(selectedRow).length === 0) {
                         message.error('未选中数据')
                     } else {

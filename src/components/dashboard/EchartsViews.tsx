@@ -79,13 +79,13 @@ const option = {
         }
     },
     series: [{
-        name: '昨日',
+        name: '',
         type: 'line',
         smooth: true,
         showSymbol: false,
         symbol: 'circle',
         symbolSize: 6,
-        data: ['1200', '1400', '808', '811', '626', '488', '1600'],
+        data: ['12000', '14000', '15000', '18000', '19000', '14880', '16000'],
         areaStyle: {
             normal: {
                 color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{

@@ -94,7 +94,7 @@ class App extends Component<AppProps> {
         return (
             <DocumentTitle title={title}>
                 <Layout>
-                    {!responsive.data.isMobile && checkLogin(auth.data.permissions) && (
+                    {!responsive.data.isMobile  && (
                         <SiderCustom collapsed={this.state.collapsed} />
                     )}
                     <ThemePicker />

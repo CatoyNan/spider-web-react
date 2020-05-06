@@ -7,6 +7,7 @@ import { PwaInstaller } from '../widget';
 import { connectAlita } from 'redux-alita';
 import { RouteComponentProps } from 'react-router';
 import { FormProps } from 'antd/lib/form';
+import {url} from "inspector";
 
 const FormItem = Form.Item;
 type LoginProps = {
@@ -43,16 +44,16 @@ class Login extends React.Component<LoginProps> {
         });
     };
     gitHub = () => {
-        window.location.href =
-            'https://github.com/login/oauth/authorize?client_id=792cdcd244e98dcd2dee&redirect_uri=http://localhost:3006/&scope=user&state=reactAdmin';
+        // window.location.href =
+        //     'https://github.com/login/oauth/authorize?client_id=792cdcd244e98dcd2dee&redirect_uri=http://localhost:3006/&scope=user&state=reactAdmin';
     };
     render() {
         const { getFieldDecorator } = this.props.form!;
         return (
-            <div className="login">
-                <div className="login-form">
+            <div className="login" style={{backgroundImage: "url('https://images2.alphacoders.com/438/438688.jpg')" }}>
+                <div className="login-form" style={{borderRadius:'5px'}}>
                     <div className="login-logo">
-                        <span>React Admin</span>
+                        <span>数据爬取平台</span>
                         <PwaInstaller />
                     </div>
                     <Form onSubmit={this.handleSubmit} style={{ maxWidth: '300px' }}>
@@ -62,7 +63,7 @@ class Login extends React.Component<LoginProps> {
                             })(
                                 <Input
                                     prefix={<Icon type="user" style={{ fontSize: 13 }} />}
-                                    placeholder="管理员输入admin, 游客输入guest"
+                                    placeholder="输入用户名"
                                 />
                             )}
                         </FormItem>
@@ -73,7 +74,7 @@ class Login extends React.Component<LoginProps> {
                                 <Input
                                     prefix={<Icon type="lock" style={{ fontSize: 13 }} />}
                                     type="password"
-                                    placeholder="管理员输入admin, 游客输入guest"
+                                    placeholder="输入密码"
                                 />
                             )}
                         </FormItem>
@@ -90,6 +91,9 @@ class Login extends React.Component<LoginProps> {
                                 htmlType="submit"
                                 className="login-form-button"
                                 style={{ width: '100%' }}
+                                onClick={()=>{
+                                    this.props.history.push('/app/dashboard/index');
+                                }}
                             >
                                 登录
                             </Button>
