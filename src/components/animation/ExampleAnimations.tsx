@@ -1,6 +1,4 @@
-/**
- * Created by hao.cheng on 2017/5/8.
- */
+
 import React from 'react';
 import { Row, Col, Card, Table, Popconfirm, Button } from 'antd';
 import BreadcrumbCustom from '../BreadcrumbCustom';

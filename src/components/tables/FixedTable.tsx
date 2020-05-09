@@ -1,6 +1,4 @@
-/**
- * Created by hao.cheng on 2017/4/16.
- */
+
 import React from 'react';
 import { Table } from 'antd';
 import { ColumnProps } from 'antd/lib/table';

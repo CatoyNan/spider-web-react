@@ -1,6 +1,4 @@
-/**
- * Created by hao.cheng on 2017/4/22.
- */
+
 import React from 'react';
 import { RadialBarChart, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 

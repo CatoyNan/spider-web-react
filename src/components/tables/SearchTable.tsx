@@ -1,6 +1,4 @@
-/**
- * Created by hao.cheng on 2017/4/16.
- */
+
 import React from 'react';
 import { Table, Input, Button, Icon } from 'antd';
 

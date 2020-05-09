@@ -1,6 +1,4 @@
-/**
- * Created by hao.cheng on 2017/4/13.
- */
+
 import React, { Component } from 'react';
 import {
     Card,

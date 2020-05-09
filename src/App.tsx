@@ -45,7 +45,7 @@ class App extends Component<AppProps> {
                         <p>
                             GitHub地址：{' '}
                             <a
-                                href="https://github.com/yezihaohao"
+                                href=""
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
@@ -55,7 +55,7 @@ class App extends Component<AppProps> {
                         <p>
                             博客地址：{' '}
                             <a
-                                href="https://yezihaohao.github.io/"
+                                href=""
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >

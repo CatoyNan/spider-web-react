@@ -1,6 +1,4 @@
-/**
- * Created by hao.cheng on 2017/4/14.
- */
+
 import React, { Component, FormEvent } from 'react';
 import { Form, Icon, Input, Button, Checkbox } from 'antd';
 import { FormProps } from 'antd/lib/form';

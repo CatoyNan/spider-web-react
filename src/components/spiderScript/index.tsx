@@ -368,13 +368,13 @@ class ScriptEditor extends Component<any, TabsCustomState> {
                                                 }}
                                                 type={'primary'}
                                             >
-                                                ADD
+                                                增加
                                             </Button>
                                             <Button onClick={this.clickPull} type={'primary'}>
-                                                PULL
+                                                下拉
                                             </Button>
                                             <Button onClick={this.clickPush} type={'primary'}>
-                                                PUSH
+                                                推送
                                             </Button>
                                             <Button
                                                 // onClick={this.add}
@@ -385,7 +385,7 @@ class ScriptEditor extends Component<any, TabsCustomState> {
                                                     color: '#fff',
                                                 }}
                                             >
-                                                DEL
+                                                删除
                                             </Button>
                                             <Button
                                                 onClick={this.clickRun}
@@ -395,7 +395,7 @@ class ScriptEditor extends Component<any, TabsCustomState> {
                                                     color: '#fff',
                                                 }}
                                             >
-                                                RUN
+                                                运行
                                             </Button>
                                         </Col>
                                         <Col md={4}>
